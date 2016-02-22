@@ -1,0 +1,89 @@
+# React Native Carousel Control
+
+React Native Carousel with support for both iOS and Android.
+![carousel-demo](https://cloud.githubusercontent.com/assets/671212/13221426/1cc2d1fc-d95a-11e5-88d2-3c4d738814e9.gif)
+
+
+## Installation
+
+```
+npm install react-native-carousel-control --save
+```
+
+## Usage
+
+```
+import Carousel from "react-native-carousel-control";
+//...
+<Carousel>
+    <Text>Hello</Text>
+    <Text>World!</Text>
+    <Text>From carousel</Text>
+</Carousel>
+```
+
+The carousel has the following format:
+
+```
+        /*
+         ------------
+        |      v--- page
+        |-   ----   -|
+        | | |    | | |
+        | | |    | | |
+        | | |    | | |
+        |-   ----   -|
+        |^-- sneak   |
+        |         ^--- gap
+         ------------
+        */
+```
+
+### pageStyle
+Type: PropTypes.object
+The style that will be applied on the page. For example:
+
+```
+<Carousel
+    pageStyle={ {backgroundColor: "white", borderRadius: 5} }
+>
+```
+
+### pageWidth
+Type: PropTypes.number
+The width of the page. By default it will adjust to `deviceWidth - 100`.
+
+### initialPage
+Type: PropTypes.number
+The index of the initial page. The first page is `0`.
+
+### onPageChange
+Type: PropTypes.func
+This function will be called every time the page changes.
+
+### sneak
+Type: PropTypes.number
+How much of the adjacent pages will display (see format above).
+
+## License
+The MIT License (MIT)
+
+Copyright (c) 2016 Gustavo Machado
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
