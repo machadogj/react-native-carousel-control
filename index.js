@@ -78,7 +78,7 @@ export default class Carousel extends Component {
         let { pageWidth } = this.props;
         let { gap } = this.state;
         let pagePosition = position * (pageWidth + gap);
-        this.scrollView.scrollTo(0, pagePosition);
+        this.scrollView.scrollTo({y: 0, x: pagePosition});
     }
 
     handleScrollEnd = (e) => {
@@ -89,7 +89,7 @@ export default class Carousel extends Component {
         let currentPosition = e.nativeEvent.contentOffset.x + (width / 2);
         // var activePage = e.nativeEvent.contentOffset.x;// / this.props.width;
         let currentPage = ~~(currentPosition / pageOffset);
-        this.scrollView.scrollTo(0, currentPage * pageOffset);
+        this.scrollView.scrollTo({y: 0, x: currentPage * pageOffset});
         this.setState({activePage:currentPage});
 
         if (this.props.onPageChange) {
