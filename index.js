@@ -1,15 +1,14 @@
 "use strict";
 
-import React from "react-native";
-let {
+import React, { Component, PropTypes } from "react";
+import {
     Dimensions,
     StyleSheet,
     View,
     ScrollView,
-    PropTypes,
-    Component,
+    Text,
     TouchableWithoutFeedback
-} = React;
+} from "react-native";
 
 import styles from "./styles";
 
@@ -24,6 +23,7 @@ export default class Carousel extends Component {
         pageWidth: PropTypes.number,
         children: PropTypes.array,
         initialPage: PropTypes.number,
+        noItemsText: PropTypes.string,
         onPageChange: PropTypes.func,
         sneak: PropTypes.number
     };
@@ -31,12 +31,9 @@ export default class Carousel extends Component {
     static defaultProps = {
         initialPage: 0,
         pageStyle: null,
-        pageWidth: width - 100,
-        sneak: 20
-    };
-
-    state = {
-        activePage: this.props.initialPage || 0
+        pageWidth: width - 80,
+        sneak: 20,
+        noItemsText: "Sorry, there are currently \n no items available"
     };
 
     componentWillMount() {
@@ -44,7 +41,7 @@ export default class Carousel extends Component {
     }
 
     componentDidMount() {
-        if (this.props.initialPage > 0) {
+        if (this.props.children && this.props.initialPage > 0 && this.props.initialPage < this.props.children.length) {
             this.goToPage(this.props.initialPage);
         }
     }
@@ -54,9 +51,13 @@ export default class Carousel extends Component {
     }
 
     calculateGap(props) {
+        let { sneak, pageWidth } = props;
+        if (pageWidth > width) {
+            throw new Error("invalid pageWith");
+        }
         /*
          ------------
-        |      v--- page
+        |            |
         |-   ----   -|
         | | |    | | |
         | | |    | | |
@@ -65,11 +66,8 @@ export default class Carousel extends Component {
         |^-- sneak   |
         |         ^--- gap
          ------------
+
         */
-        let { sneak, pageWidth } = props;
-        if (pageWidth > width) {
-            throw new Error("invalid pageWith");
-        }
         let gap = (width - (2 * sneak) - pageWidth) / 2;
         this.setState({gap: gap});
     }
@@ -78,7 +76,8 @@ export default class Carousel extends Component {
         let { pageWidth } = this.props;
         let { gap } = this.state;
         let pagePosition = position * (pageWidth + gap);
-        this.scrollView.scrollTo({y: 0, x: pagePosition});
+        this.scrollView.scrollTo({ y: 0, x: pagePosition });
+        this._onPageChange(position);
     }
 
     handleScrollEnd = (e) => {
@@ -87,18 +86,20 @@ export default class Carousel extends Component {
         let pageOffset = pageWidth + gap;
         //select page based on the position of the middle of the screen.
         let currentPosition = e.nativeEvent.contentOffset.x + (width / 2);
-        // var activePage = e.nativeEvent.contentOffset.x;// / this.props.width;
         let currentPage = ~~(currentPosition / pageOffset);
-        this.scrollView.scrollTo({y: 0, x: currentPage * pageOffset});
-        this.setState({activePage:currentPage});
 
-        if (this.props.onPageChange) {
-            this.props.onPageChange(currentPage);
-        }
+        this.scrollView.scrollTo({ y: 0, x: currentPage * pageOffset });
+        this._onPageChange(currentPage);
     };
 
-    render() {
+    _onPageChange(position) {
+        if (this.props.onPageChange) {
+            let currentElement = this.props.children[position];
+            this.props.onPageChange(position, currentElement);
+        }
+    }
 
+    render() {
         let { sneak, pageWidth } = this.props;
         let { gap } = this.state;
         let computedStyles = StyleSheet.create({
@@ -113,34 +114,50 @@ export default class Carousel extends Component {
                 marginRight: gap / 2
             }
         });
-        let pages = this.props.children.map((c, index) => {
-            return (
-                <TouchableWithoutFeedback
-                    key={ index }
-                    onPress={ ()=> this.goToPage(index) }
-                >
-                    <View
-                        style={ [ styles.page, computedStyles.page, this.props.pageStyle ] }
-                    >
-                        { c }
+
+        // if no children render a no items dummy page without callbacks
+        let body = null;
+        if (!this.props.children) {
+            body = (
+                <TouchableWithoutFeedback>
+                    <View style={ [ styles.page, computedStyles.page, this.props.pageStyle ] }>
+                        <Text style={ styles.noItemsText }>
+                            { this.props.noItemsText }
+                        </Text>
                     </View>
                 </TouchableWithoutFeedback>
             );
-        });
+        }
+        else {
+            body = this.props.children.map((c, index) => {
+                return (
+                    <TouchableWithoutFeedback
+                        key={ index }
+                        onPress={ () => this.goToPage(index) }
+                    >
+                        <View
+                            style={ [ styles.page, computedStyles.page, this.props.pageStyle ] }
+                        >
+                            { c }
+                        </View>
+                    </TouchableWithoutFeedback>
+                );
+            });
+        }
 
         return (
-            <View style={ { flex: 1 } }>
+            <View style={ styles.container }>
                 <ScrollView
                     automaticallyAdjustContentInsets={ false }
                     bounces
-                    contentContainerStyle={ [ styles.container, computedStyles.scrollView ] }
+                    contentContainerStyle={ [ computedStyles.scrollView ] }
                     decelerationRate={ 0.9 }
                     horizontal
                     onScrollEndDrag={ this.handleScrollEnd }
                     ref={ c => this.scrollView = c }
                     showsHorizontalScrollIndicator={ false }
                 >
-                    { pages }
+                    { body }
                 </ScrollView>
             </View>
         );
