@@ -76,7 +76,17 @@ export default class Carousel extends Component {
         let { pageWidth } = this.props;
         let { gap } = this.state;
         let pagePosition = position * (pageWidth + gap);
-        this.scrollView.scrollTo({ y: 0, x: pagePosition });
+        // in android, you can't scroll directly in componentDidMount
+        // (http://stackoverflow.com/questions/33208477/react-native-android-scrollview-scrollto-not-working)
+        // however this doesn't work in android for some reason:
+        // InteractionManager.runAfterInteractions(() => {
+        //     this.scrollView.scrollTo({ y: 0, x: pagePosition}, true);
+        //     console.log('scrollView.scrollTo x:', pagePosition);
+        // });
+        // So I was left with an arbitrary timeout.
+        setTimeout(()=> {
+            this.scrollView.scrollTo({ y: 0, x: pagePosition}, true);
+        }, 200);
         this._onPageChange(position);
     }
 
