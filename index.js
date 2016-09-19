@@ -21,11 +21,12 @@ export default class Carousel extends Component {
     static propTypes = {
         pageStyle: PropTypes.object,
         pageWidth: PropTypes.number,
-        children: PropTypes.array,
+        children: PropTypes.oneOfType([ PropTypes.arrayOf(PropTypes.node), PropTypes.node ]).isRequired,
         initialPage: PropTypes.number,
         noItemsText: PropTypes.string,
         onPageChange: PropTypes.func,
-        sneak: PropTypes.number
+        sneak: PropTypes.number,
+        transitionDelay: PropTypes.number
     };
 
     static defaultProps = {
@@ -33,7 +34,8 @@ export default class Carousel extends Component {
         pageStyle: null,
         pageWidth: width - 80,
         sneak: 20,
-        noItemsText: "Sorry, there are currently \n no items available"
+        noItemsText: "Sorry, there are currently \n no items available",
+        transitionDelay: 0
     };
 
     componentWillMount() {
@@ -73,7 +75,7 @@ export default class Carousel extends Component {
     }
 
     goToPage(position) {
-        let { pageWidth } = this.props;
+        let { pageWidth, transitionDelay } = this.props;
         let { gap } = this.state;
         let pagePosition = position * (pageWidth + gap);
         // in android, you can't scroll directly in componentDidMount
@@ -86,7 +88,7 @@ export default class Carousel extends Component {
         // So I was left with an arbitrary timeout.
         setTimeout(()=> {
             this.scrollView.scrollTo({ y: 0, x: pagePosition}, true);
-        }, 200);
+        }, transitionDelay);
         this._onPageChange(position);
     }
 
@@ -95,7 +97,7 @@ export default class Carousel extends Component {
         let { gap } = this.state;
         let pageOffset = pageWidth + gap;
         //select page based on the position of the middle of the screen.
-        let currentPosition = e.nativeEvent.contentOffset.x + (width / 2);
+        let currentPosition = e.nativeEvent.contentOffset.x + (pageOffset / 2);
         let currentPage = ~~(currentPosition / pageOffset);
 
         this.scrollView.scrollTo({ y: 0, x: currentPage * pageOffset });
@@ -139,7 +141,8 @@ export default class Carousel extends Component {
             );
         }
         else {
-            body = this.props.children.map((c, index) => {
+            const children = Array.isArray(this.props.children) ? this.props.children : [this.props.children]
+            body = children.map((c, index) => {
                 return (
                     <TouchableWithoutFeedback
                         key={ index }
