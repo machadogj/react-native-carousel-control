@@ -26,7 +26,8 @@ export default class Carousel extends Component {
         noItemsText: PropTypes.string,
         onPageChange: PropTypes.func,
         sneak: PropTypes.number,
-        transitionDelay: PropTypes.number
+        transitionDelay: PropTypes.number,
+        goToPage: PropTypes.number
     };
 
     static defaultProps = {
