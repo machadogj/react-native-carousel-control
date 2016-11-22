@@ -26,7 +26,8 @@ export default class Carousel extends Component {
         noItemsText: PropTypes.string,
         onPageChange: PropTypes.func,
         sneak: PropTypes.number,
-        transitionDelay: PropTypes.number
+        transitionDelay: PropTypes.number,
+        currentPage: PropTypes.number
     };
 
     static defaultProps = {
@@ -49,6 +50,17 @@ export default class Carousel extends Component {
     }
 
     componentWillReceiveProps(props) {
+        let { pageWidth } = this.props;
+        let { gap } = this.state;
+        let pageOffset = pageWidth + gap;
+
+        this.setState(
+            {currentPage: props.currentPage},
+            () => {
+                this.scrollView.scrollTo({ y: 0, x: (this.state.currentPage) * pageOffset });
+            } 
+        );
+
         this.calculateGap(props);
     }
 
