@@ -71,6 +71,16 @@ Type: `PropTypes.number`
 
 How much of the adjacent pages will display (see format above).
 
+### currentPage
+
+Type: `PropTypes.number`
+
+Update this value to move carousel to a specific page. For example:
+
+```
+<Carousel currentPage={ this.state.pageNumber }>
+```
+
 ## License
 
 The MIT License (MIT)
