@@ -23,6 +23,7 @@ export default class Carousel extends Component {
         pageWidth: PropTypes.number,
         children: PropTypes.oneOfType([ PropTypes.arrayOf(PropTypes.node), PropTypes.node ]).isRequired,
         initialPage: PropTypes.number,
+        containerStyle: PropTypes.object,
         noItemsText: PropTypes.string,
         onPageChange: PropTypes.func,
         sneak: PropTypes.number,
@@ -32,6 +33,7 @@ export default class Carousel extends Component {
     static defaultProps = {
         initialPage: 0,
         pageStyle: null,
+        containerStyle: null,
         pageWidth: width - 80,
         sneak: 20,
         noItemsText: "Sorry, there are currently \n no items available",
@@ -159,7 +161,7 @@ export default class Carousel extends Component {
         }
 
         return (
-            <View style={ styles.container }>
+            <View style={[ styles.container, this.props.containerStyle ]}>
                 <ScrollView
                     automaticallyAdjustContentInsets={ false }
                     bounces
