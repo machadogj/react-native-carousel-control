@@ -38,8 +38,18 @@ export default class Carousel extends Component {
         pageWidth: width - 80,
         sneak: 20,
         noItemsText: "Sorry, there are currently \n no items available",
-        transitionDelay: 0
+        transitionDelay: 0,
+        currentPage: 0
     };
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            gap: undefined,
+            currentPage: props.currentPage,
+        };
+    }
 
     componentWillMount() {
         this.calculateGap(this.props);
