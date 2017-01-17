@@ -49,6 +49,8 @@ export default class Carousel extends Component {
             gap: undefined,
             currentPage: props.currentPage,
         };
+
+        this._scrollTimeout = null;
     }
 
     componentWillMount() {
@@ -72,6 +74,12 @@ export default class Carousel extends Component {
                 this.scrollView.scrollTo({ y: 0, x: (this.state.currentPage) * pageOffset });
             } 
         );
+
+    componentWillUnmount() {
+        if (this._scrollTimeout) {
+            clearTimeout(this._scrollTimeout);
+        }
+    }
 
         this.calculateGap(props);
     }
@@ -110,8 +118,9 @@ export default class Carousel extends Component {
         //     console.log('scrollView.scrollTo x:', pagePosition);
         // });
         // So I was left with an arbitrary timeout.
-        setTimeout(()=> {
+        this._scrollTimeout = setTimeout(()=> {
             this.scrollView.scrollTo({ y: 0, x: pagePosition}, true);
+            this._scrollTimeout = null;
         }, transitionDelay);
         this._onPageChange(position);
     }
