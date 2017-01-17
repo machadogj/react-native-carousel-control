@@ -75,13 +75,13 @@ export default class Carousel extends Component {
             } 
         );
 
+        this.calculateGap(props);
+    }
+
     componentWillUnmount() {
         if (this._scrollTimeout) {
             clearTimeout(this._scrollTimeout);
         }
-    }
-
-        this.calculateGap(props);
     }
 
     calculateGap(props) {
