@@ -28,7 +28,8 @@ export default class Carousel extends Component {
         onPageChange: PropTypes.func,
         sneak: PropTypes.number,
         transitionDelay: PropTypes.number,
-        currentPage: PropTypes.number
+        currentPage: PropTypes.number,
+        swipeThreshold: PropTypes.number
     };
 
     static defaultProps = {
@@ -39,7 +40,8 @@ export default class Carousel extends Component {
         sneak: 20,
         noItemsText: "Sorry, there are currently \n no items available",
         transitionDelay: 0,
-        currentPage: 0
+        currentPage: 0,
+        swipeThreshold: 0.5
     };
 
     constructor(props) {
@@ -100,6 +102,10 @@ export default class Carousel extends Component {
         return pageIndex * this._getPageOffset();
     }
 
+    _getPagesCount() {
+        return React.Children.count(this.props.children);
+    }
+
     _resetScrollPosition(animated = true) {
         // in android, you can't scroll directly in componentDidMount
         // (http://stackoverflow.com/questions/33208477/react-native-android-scrollview-scrollto-not-working)
@@ -145,12 +151,21 @@ export default class Carousel extends Component {
     }
 
     _handleScrollEnd(e) {
-        const { pageWidth } = this.props;
-        const { gap, currentPage } = this.state;
-        const pageOffset = pageWidth + gap;
-        //select page based on the position of the middle of the screen.
-        const currentPosition = e.nativeEvent.contentOffset.x + (pageOffset / 2);
-        const newPage = ~~(currentPosition / pageOffset);
+        const { swipeThreshold } = this.props;
+        const { currentPage } = this.state;
+
+        const currentPageScrollX = this._getPageScrollX(currentPage);
+        const currentScrollX = e.nativeEvent.contentOffset.x;
+
+        const swiped = (currentScrollX - currentPageScrollX) / this._getPageOffset();
+
+        let newPage = currentPage;
+
+        if (currentPage + 1 < this._getPagesCount() && swipeThreshold < swiped) {
+            newPage++;
+        } else if (0 < currentPage && swiped < -swipeThreshold) {
+            newPage--;
+        }
 
         if (newPage !== currentPage) {
             this.setState({currentPage: newPage});
