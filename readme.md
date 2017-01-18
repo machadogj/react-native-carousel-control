@@ -85,7 +85,7 @@ Update this value to move carousel to a specific page. For example:
 
 Type: `PropTypes.number`
 
-How much do users have to swipe to go to the next/prev page. Default: 0.5 (half the page)
+How much users have to swipe to go to the next/prev page. Default: 0.5 (half the page)
 
 ## License
 
