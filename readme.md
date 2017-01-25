@@ -81,6 +81,12 @@ Update this value to move carousel to a specific page. For example:
 <Carousel currentPage={ this.state.pageNumber }>
 ```
 
+### swipeThreshold
+
+Type: `PropTypes.number`
+
+How much users have to swipe to go to the next/prev page. Default: 0.5 (half the page)
+
 ## License
 
 The MIT License (MIT)

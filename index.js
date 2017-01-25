@@ -12,7 +12,7 @@ import {
 
 import styles from "./styles";
 
-let { width } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 export default class Carousel extends Component {
 
@@ -28,7 +28,8 @@ export default class Carousel extends Component {
         onPageChange: PropTypes.func,
         sneak: PropTypes.number,
         transitionDelay: PropTypes.number,
-        currentPage: PropTypes.number
+        currentPage: PropTypes.number,
+        swipeThreshold: PropTypes.number
     };
 
     static defaultProps = {
@@ -38,38 +39,99 @@ export default class Carousel extends Component {
         pageWidth: width - 80,
         sneak: 20,
         noItemsText: "Sorry, there are currently \n no items available",
-        transitionDelay: 0
+        transitionDelay: 0,
+        currentPage: 0,
+        swipeThreshold: 0.5
     };
 
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            gap: undefined,
+            currentPage: props.currentPage,
+        };
+
+        this._scrollTimeout = null;
+
+        this._resetScrollPosition = this._resetScrollPosition.bind(this);
+        this._handleScrollEnd = this._handleScrollEnd.bind(this);
+    }
+
     componentWillMount() {
-        this.calculateGap(this.props);
+        this._calculateGap(this.props);
     }
 
     componentDidMount() {
-        if (this.props.children && this.props.initialPage > 0 && this.props.initialPage < this.props.children.length) {
-            this.goToPage(this.props.initialPage);
+        this._resetScrollPosition(false);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this._calculateGap(nextProps);
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.currentPage !== this.props.currentPage) {
+            this._resetScrollPosition();
+            this._onPageChange(this.props.currentPage);
+        } else if (prevState.currentPage !== this.state.currentPage) {
+            this._resetScrollPosition();
+            this._onPageChange(this.state.currentPage);
         }
     }
 
-    componentWillReceiveProps(props) {
-        let { pageWidth } = this.props;
-        let { gap } = this.state;
-        let pageOffset = pageWidth + gap;
-
-        this.setState(
-            {currentPage: props.currentPage},
-            () => {
-                this.scrollView.scrollTo({ y: 0, x: (this.state.currentPage) * pageOffset });
-            } 
-        );
-
-        this.calculateGap(props);
+    componentWillUnmount() {
+        if (this._scrollTimeout) {
+            clearTimeout(this._scrollTimeout);
+        }
     }
 
-    calculateGap(props) {
-        let { sneak, pageWidth } = props;
+    _getPageOffset() {
+        const {
+            pageWidth,
+        } = this.props;
+
+        const {
+            gap,
+        } = this.state;
+
+        return pageWidth + gap;
+    }
+
+    _getPageScrollX(pageIndex) {
+        return pageIndex * this._getPageOffset();
+    }
+
+    _getPagesCount() {
+        return React.Children.count(this.props.children);
+    }
+
+    _resetScrollPosition(animated = true) {
+        // in android, you can't scroll directly in componentDidMount
+        // (http://stackoverflow.com/questions/33208477/react-native-android-scrollview-scrollto-not-working)
+        // however this doesn't work in android for some reason:
+        // InteractionManager.runAfterInteractions(() => {
+        //     this.scrollView.scrollTo({ y: 0, x: pagePosition}, true);
+        //     console.log('scrollView.scrollTo x:', pagePosition);
+        // });
+        // So I was left with an arbitrary timeout.
+        if (this._scrollTimeout) {
+            clearTimeout(this._scrollTimeout);
+        }
+        this._scrollTimeout = setTimeout(() => {
+            this.scrollView.scrollTo({
+                x: this._getPageScrollX(this.state.currentPage),
+                y: 0,
+                animated,
+            });
+            this._scrollTimeout = null;
+        }, this.props.transitionDelay);
+    }
+
+    _calculateGap(props) {
+        const { sneak, pageWidth } = props;
         if (pageWidth > width) {
-            throw new Error("invalid pageWith");
+            throw new Error("invalid pageWidth");
         }
         /*
          ------------
@@ -84,51 +146,46 @@ export default class Carousel extends Component {
          ------------
 
         */
-        let gap = (width - (2 * sneak) - pageWidth) / 2;
+        const gap = (width - (2 * sneak) - pageWidth) / 2;
         this.setState({gap: gap});
     }
 
-    goToPage(position) {
-        let { pageWidth, transitionDelay } = this.props;
-        let { gap } = this.state;
-        let pagePosition = position * (pageWidth + gap);
-        // in android, you can't scroll directly in componentDidMount
-        // (http://stackoverflow.com/questions/33208477/react-native-android-scrollview-scrollto-not-working)
-        // however this doesn't work in android for some reason:
-        // InteractionManager.runAfterInteractions(() => {
-        //     this.scrollView.scrollTo({ y: 0, x: pagePosition}, true);
-        //     console.log('scrollView.scrollTo x:', pagePosition);
-        // });
-        // So I was left with an arbitrary timeout.
-        setTimeout(()=> {
-            this.scrollView.scrollTo({ y: 0, x: pagePosition}, true);
-        }, transitionDelay);
-        this._onPageChange(position);
-    }
+    _handleScrollEnd(e) {
+        const { swipeThreshold } = this.props;
+        const { currentPage } = this.state;
 
-    handleScrollEnd = (e) => {
-        let { pageWidth } = this.props;
-        let { gap } = this.state;
-        let pageOffset = pageWidth + gap;
-        //select page based on the position of the middle of the screen.
-        let currentPosition = e.nativeEvent.contentOffset.x + (pageOffset / 2);
-        let currentPage = ~~(currentPosition / pageOffset);
+        const currentPageScrollX = this._getPageScrollX(currentPage);
+        const currentScrollX = e.nativeEvent.contentOffset.x;
 
-        this.scrollView.scrollTo({ y: 0, x: currentPage * pageOffset });
-        this._onPageChange(currentPage);
+        const swiped = (currentScrollX - currentPageScrollX) / this._getPageOffset();
+
+        let newPage = currentPage;
+
+        if (currentPage + 1 < this._getPagesCount() && swipeThreshold < swiped) {
+            newPage++;
+        } else if (0 < currentPage && swiped < -swipeThreshold) {
+            newPage--;
+        }
+
+        if (newPage !== currentPage) {
+            this.setState({currentPage: newPage});
+        } else {
+            this._resetScrollPosition();
+        }
+
     };
 
     _onPageChange(position) {
         if (this.props.onPageChange) {
-            let currentElement = this.props.children[position];
+            const currentElement = this.props.children[position];
             this.props.onPageChange(position, currentElement);
         }
     }
 
     render() {
-        let { sneak, pageWidth } = this.props;
-        let { gap } = this.state;
-        let computedStyles = StyleSheet.create({
+        const { sneak, pageWidth } = this.props;
+        const { gap } = this.state;
+        const computedStyles = StyleSheet.create({
             scrollView: {
                 paddingLeft: sneak + gap / 2,
                 paddingRight: sneak + gap / 2
@@ -160,7 +217,7 @@ export default class Carousel extends Component {
                 return (
                     <TouchableWithoutFeedback
                         key={ index }
-                        onPress={ () => this.goToPage(index) }
+                        onPress={ () => this.setState({currentPage: index}) }
                     >
                         <View
                             style={ [ styles.page, computedStyles.page, this.props.pageStyle ] }
@@ -180,7 +237,7 @@ export default class Carousel extends Component {
                     contentContainerStyle={ [ computedStyles.scrollView ] }
                     decelerationRate={ 0.9 }
                     horizontal
-                    onScrollEndDrag={ this.handleScrollEnd }
+                    onScrollEndDrag={ this._handleScrollEnd }
                     ref={ c => this.scrollView = c }
                     showsHorizontalScrollIndicator={ false }
                 >
