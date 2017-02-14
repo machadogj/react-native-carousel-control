@@ -67,6 +67,11 @@ export default class Carousel extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
+        
+        this.setState({
+            currentPage: nextProps.currentPage
+        });
+        
         this._calculateGap(nextProps);
     }
 
