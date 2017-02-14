@@ -1,6 +1,6 @@
 {
   "name": "react-native-carousel-control",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "React Native Carousel control with support for iOS and Android.",
   "main": "index.js",
   "scripts": {
