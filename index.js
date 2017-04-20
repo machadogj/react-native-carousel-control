@@ -3,11 +3,12 @@
 import React, { Component, PropTypes } from "react";
 import {
     Dimensions,
-    StyleSheet,
-    View,
+    I18nManager,
     ScrollView,
+    StyleSheet,
     Text,
     TouchableWithoutFeedback
+    View,
 } from "react-native";
 
 import styles from "./styles";
@@ -235,7 +236,7 @@ export default class Carousel extends Component {
                     automaticallyAdjustContentInsets={ false }
                     bounces
                     contentContainerStyle={ [ computedStyles.scrollView ] }
-                    style={{ flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row' }}
+                    style={{ flexDirection: (I18nManager && I18nManager.isRTL) ? 'row-reverse' : 'row' }}
                     decelerationRate={ 0.9 }
                     horizontal
                     onScrollEndDrag={ this._handleScrollEnd }
