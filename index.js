@@ -240,6 +240,7 @@ export default class Carousel extends Component {
                     automaticallyAdjustContentInsets={ false }
                     bounces
                     contentContainerStyle={ [ computedStyles.scrollView ] }
+                    style={{ flexDirection: I18nManager.isRTL ? 'row-reverse' : 'row' }}
                     decelerationRate={ 0.9 }
                     horizontal
                     onScrollEndDrag={ this._handleScrollEnd }
