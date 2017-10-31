@@ -3,6 +3,8 @@
 React Native Carousel with support for both iOS and Android.
 ![carousel-demo](https://cloud.githubusercontent.com/assets/671212/13221426/1cc2d1fc-d95a-11e5-88d2-3c4d738814e9.gif)
 
+React >= 16 -> 2.x.x
+React <  16 -> 1.x.x
 
 ## Installation
 
