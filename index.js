@@ -9,8 +9,7 @@ import {
     StyleSheet,
     Text,
     TouchableWithoutFeedback,
-    View,
-    FlatList
+    View
 } from "react-native";
 
 import styles from "./styles";
@@ -27,12 +26,14 @@ export default class Carousel extends Component {
         children: PropTypes.oneOfType([ PropTypes.arrayOf(PropTypes.node), PropTypes.node ]).isRequired,
         initialPage: PropTypes.number,
         containerStyle: PropTypes.object,
+        contentContainerStyle: PropTypes.object,
         noItemsText: PropTypes.string,
         onPageChange: PropTypes.func,
         sneak: PropTypes.number,
         transitionDelay: PropTypes.number,
         currentPage: PropTypes.number,
-        swipeThreshold: PropTypes.number
+        swipeThreshold: PropTypes.number,
+        paddingLeft: PropTypes.number
     };
 
     static defaultProps = {
@@ -40,11 +41,12 @@ export default class Carousel extends Component {
         pageStyle: null,
         containerStyle: null,
         pageWidth: width - 80,
-        sneak: 22,
+        sneak: 20,
         noItemsText: "Sorry, there are currently \n no items available",
         transitionDelay: 0,
         currentPage: 0,
-        swipeThreshold: 0.3
+        swipeThreshold: 0.5,
+        paddingLeft: 0
     };
 
     constructor(props) {
@@ -70,7 +72,7 @@ export default class Carousel extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        console.log("nextProps: ", nextProps)
+        
         this.setState({
             currentPage: nextProps.currentPage
         });
@@ -107,11 +109,9 @@ export default class Carousel extends Component {
     }
 
     _getPageScrollX(pageIndex) {
-        if (pageIndex == 0 ) {
-            return pageIndex * this._getPageOffset();
-        } else {
-            return pageIndex * this._getPageOffset() - (this.state.gap/2 + this.props.sneak) ;
-        }
+        const { paddingLeft, sneak } = this.props;
+        const { gap } = this.state;
+        return (pageIndex == 0) ? 0 : pageIndex * this._getPageOffset() - (sneak + gap / 2) + paddingLeft;
     }
 
     _getPagesCount() {
@@ -126,7 +126,7 @@ export default class Carousel extends Component {
         //     this.scrollView.scrollTo({ y: 0, x: pagePosition}, true);
         //     console.log('scrollView.scrollTo x:', pagePosition);
         // });
-        // So I was left with an arbitrary timeout. 
+        // So I was left with an arbitrary timeout.
         if (this._scrollTimeout) {
             clearTimeout(this._scrollTimeout);
         }
@@ -163,7 +163,6 @@ export default class Carousel extends Component {
     }
 
     _handleScrollEnd(e) {
-        console.log("Scroll end!")
         const { swipeThreshold } = this.props;
         const { currentPage } = this.state;
 
@@ -191,14 +190,18 @@ export default class Carousel extends Component {
     }
 
     render() {
-        console.log("this.currentPage: ",this.state.currentPage)
-        const { sneak, pageWidth } = this.props;
+        const { sneak, pageWidth, contentContainerStyle, paddingLeft } = this.props;
         const { gap } = this.state;
+
+        const scrollViewStyle = StyleSheet.flatten([
+            contentContainerStyle,
+            {
+                paddingLeft: paddingLeft
+            }
+        ])
+
         const computedStyles = StyleSheet.create({
-            scrollView: {
-                paddingLeft: 0,
-                paddingRight: 0
-            },
+            scrollView: scrollViewStyle,
             page: {
                 width: pageWidth,
                 justifyContent: "center",
@@ -206,6 +209,7 @@ export default class Carousel extends Component {
                 marginRight: gap / 2
             }
         });
+        
 
         // if no children render a no items dummy page without callbacks
         let body = null;
@@ -221,14 +225,12 @@ export default class Carousel extends Component {
             );
         }
         else {
-
-
             const children = Array.isArray(this.props.children) ? this.props.children : [this.props.children]
             body = children.map((c, index) => {
                 return (
                     <TouchableWithoutFeedback
                         key={ index }
-                        onPress={ () => { console.log("fuck");this.setState({currentPage: index}) } }
+                        onPress={ () => this.setState({currentPage: index}) }
                     >
                         <View
                             style={ [ styles.page, computedStyles.page, this.props.pageStyle ] }
@@ -245,8 +247,8 @@ export default class Carousel extends Component {
                 <ScrollView
                     automaticallyAdjustContentInsets={ false }
                     bounces
-                    contentContainerStyle={ [ computedStyles.scrollView ,{alignItems: 'center',  justifyContent: 'flex-start'}] }
-                    style={{ flexDirection: (I18nManager && I18nManager.isRTL) ? 'row-reverse' : 'row'}}
+                    contentContainerStyle={ [ computedStyles.scrollView] }
+                    style={{ flexDirection: (I18nManager && I18nManager.isRTL) ? 'row-reverse' : 'row' }}
                     decelerationRate={ 0.9 }
                     horizontal
                     onScrollEndDrag={ this._handleScrollEnd }
