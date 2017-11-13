@@ -72,7 +72,6 @@ export default class Carousel extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        
         this.setState({
             currentPage: nextProps.currentPage
         });
@@ -179,8 +178,7 @@ export default class Carousel extends Component {
         } else {
             this._resetScrollPosition();
         }
-
-    };
+    }
 
     _onPageChange(position) {
         if (this.props.onPageChange) {
@@ -210,7 +208,6 @@ export default class Carousel extends Component {
             }
         });
         
-
         // if no children render a no items dummy page without callbacks
         let body = null;
         if (!this.props.children) {
@@ -255,7 +252,7 @@ export default class Carousel extends Component {
                     ref={ c => this.scrollView = c }
                     showsHorizontalScrollIndicator={ false }
                 >
-                    {body}
+                    { body }
                 </ScrollView>
             </View>
         );
