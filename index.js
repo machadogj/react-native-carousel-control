@@ -26,12 +26,14 @@ export default class Carousel extends Component {
         children: PropTypes.oneOfType([ PropTypes.arrayOf(PropTypes.node), PropTypes.node ]).isRequired,
         initialPage: PropTypes.number,
         containerStyle: PropTypes.object,
+        contentContainerStyle: PropTypes.object,
         noItemsText: PropTypes.string,
         onPageChange: PropTypes.func,
         sneak: PropTypes.number,
         transitionDelay: PropTypes.number,
         currentPage: PropTypes.number,
-        swipeThreshold: PropTypes.number
+        swipeThreshold: PropTypes.number,
+        paddingLeft: PropTypes.number
     };
 
     static defaultProps = {
@@ -43,7 +45,8 @@ export default class Carousel extends Component {
         noItemsText: "Sorry, there are currently \n no items available",
         transitionDelay: 0,
         currentPage: 0,
-        swipeThreshold: 0.5
+        swipeThreshold: 0.5,
+        paddingLeft: 0
     };
 
     constructor(props) {
@@ -69,7 +72,6 @@ export default class Carousel extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        
         this.setState({
             currentPage: nextProps.currentPage
         });
@@ -106,7 +108,9 @@ export default class Carousel extends Component {
     }
 
     _getPageScrollX(pageIndex) {
-        return pageIndex * this._getPageOffset();
+        const { paddingLeft, sneak } = this.props;
+        const { gap } = this.state;
+        return (pageIndex == 0) ? 0 : pageIndex * this._getPageOffset() - (sneak + gap / 2) + paddingLeft;
     }
 
     _getPagesCount() {
@@ -174,8 +178,7 @@ export default class Carousel extends Component {
         } else {
             this._resetScrollPosition();
         }
-
-    };
+    }
 
     _onPageChange(position) {
         if (this.props.onPageChange) {
@@ -185,13 +188,18 @@ export default class Carousel extends Component {
     }
 
     render() {
-        const { sneak, pageWidth } = this.props;
+        const { sneak, pageWidth, contentContainerStyle, paddingLeft } = this.props;
         const { gap } = this.state;
+
+        const scrollViewStyle = StyleSheet.flatten([
+            contentContainerStyle,
+            {
+                paddingLeft: paddingLeft
+            }
+        ])
+
         const computedStyles = StyleSheet.create({
-            scrollView: {
-                paddingLeft: sneak + gap / 2,
-                paddingRight: sneak + gap / 2
-            },
+            scrollView: scrollViewStyle,
             page: {
                 width: pageWidth,
                 justifyContent: "center",
@@ -199,7 +207,7 @@ export default class Carousel extends Component {
                 marginRight: gap / 2
             }
         });
-
+        
         // if no children render a no items dummy page without callbacks
         let body = null;
         if (!this.props.children) {
@@ -236,7 +244,7 @@ export default class Carousel extends Component {
                 <ScrollView
                     automaticallyAdjustContentInsets={ false }
                     bounces
-                    contentContainerStyle={ [ computedStyles.scrollView ] }
+                    contentContainerStyle={ [ computedStyles.scrollView] }
                     style={{ flexDirection: (I18nManager && I18nManager.isRTL) ? 'row-reverse' : 'row' }}
                     decelerationRate={ 0.9 }
                     horizontal
