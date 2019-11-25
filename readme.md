@@ -9,13 +9,15 @@ React <  16 -> 1.x.x
 ## Installation
 
 ```
-npm install react-native-carousel-control --save
+Previous Version - npm install react-native-carousel-control --save
 ```
-
+```
+Latest Version - npm install @amkayondo/react-native-carousel-control --save
+```
 ## Usage
 
 ```
-import Carousel from "react-native-carousel-control";
+import Carousel from "@amkayondo/react-native-carousel-control";
 //...
 <Carousel>
     <Text>Hello</Text>
