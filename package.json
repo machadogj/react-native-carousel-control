@@ -1,5 +1,5 @@
 {
-  "name": "react-native-carousel-control",
+  "name": "@amkayondo/react-native-carousel-control",
   "version": "2.0.1",
   "description": "React Native Carousel control with support for iOS and Android.",
   "main": "index.js",

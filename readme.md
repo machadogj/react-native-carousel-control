@@ -9,9 +9,8 @@ React <  16 -> 1.x.x
 ## Installation
 
 ```
-npm install react-native-carousel-control --save
+Previous Version - npm install react-native-carousel-control --save
 ```
-
 ## Usage
 
 ```

@@ -60,7 +60,7 @@ export default class Carousel extends Component {
         this._handleScrollEnd = this._handleScrollEnd.bind(this);
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this._calculateGap(this.props);
     }
 
@@ -68,7 +68,7 @@ export default class Carousel extends Component {
         this._resetScrollPosition(false);
     }
 
-    componentWillReceiveProps(nextProps) {
+    UNSAFE_componentWillReceiveProps(nextProps) {
         
         this.setState({
             currentPage: nextProps.currentPage
