@@ -44,7 +44,8 @@ export default class Carousel extends Component {
         noItemsText: "Sorry, there are currently \n no items available",
         transitionDelay: 0,
         currentPage: 0,
-        swipeThreshold: 0.5
+        swipeThreshold: 0.5,
+        horizontal: true
     };
 
     constructor(props) {
@@ -139,9 +140,9 @@ export default class Carousel extends Component {
     _calculateGap(props) {
         const { sneak } = props;
         const pageWidth = this._getPageWidth();
-        if (pageWidth > width) {
-            throw new Error("invalid pageWidth");
-        }
+        // if (pageWidth > width) {
+        //     throw new Error("invalid pageWidth");
+        // }
         /*
          ------------
         |            |
@@ -253,7 +254,7 @@ export default class Carousel extends Component {
                     contentContainerStyle={ [ computedStyles.scrollView ] }
                     style={{ flexDirection: (I18nManager && I18nManager.isRTL) ? 'row-reverse' : 'row' }}
                     decelerationRate={ 0.9 }
-                    horizontal
+                    horizontal = {this.props.horizontal}
                     onScrollEndDrag={ this._handleScrollEnd }
                     ref={ c => this.scrollView = c }
                     showsHorizontalScrollIndicator={ false }
