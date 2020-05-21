@@ -14,7 +14,8 @@ import {
 
 import styles from "./styles";
 
-const { width } = Dimensions.get("window");
+var { width } = Dimensions.get("window");
+var defaultPageWidth = width - 80;
 
 export default class Carousel extends Component {
 
@@ -38,12 +39,13 @@ export default class Carousel extends Component {
         initialPage: 0,
         pageStyle: null,
         containerStyle: null,
-        pageWidth: width - 80,
+        pageWidth: defaultPageWidth,
         sneak: 20,
         noItemsText: "Sorry, there are currently \n no items available",
         transitionDelay: 0,
         currentPage: 0,
-        swipeThreshold: 0.5
+        swipeThreshold: 0.5,
+        horizontal: true
     };
 
     constructor(props) {
@@ -58,6 +60,8 @@ export default class Carousel extends Component {
 
         this._resetScrollPosition = this._resetScrollPosition.bind(this);
         this._handleScrollEnd = this._handleScrollEnd.bind(this);
+        this._onLayout = this._onLayout.bind(this);
+        this._getPageWidth = this._getPageWidth.bind(this);
     }
 
     componentWillMount() {
@@ -94,9 +98,7 @@ export default class Carousel extends Component {
     }
 
     _getPageOffset() {
-        const {
-            pageWidth,
-        } = this.props;
+        const pageWidth = this._getPageWidth();
 
         const {
             gap,
@@ -136,10 +138,11 @@ export default class Carousel extends Component {
     }
 
     _calculateGap(props) {
-        const { sneak, pageWidth } = props;
-        if (pageWidth > width) {
-            throw new Error("invalid pageWidth");
-        }
+        const { sneak } = props;
+        const pageWidth = this._getPageWidth();
+        // if (pageWidth > width) {
+        //     throw new Error("invalid pageWidth");
+        // }
         /*
          ------------
         |            |
@@ -183,9 +186,21 @@ export default class Carousel extends Component {
             this.props.onPageChange(position, currentElement);
         }
     }
+    
+    _onLayout(event) {
+      width = event.nativeEvent.layout.width;
+      this._calculateGap(this.props);
+    }
+    
+    _getPageWidth() {
+      return this.props.pageWidth == defaultPageWidth
+      ? defaultPageWidth
+      : this.props.pageWidth;
+    }
 
     render() {
-        const { sneak, pageWidth } = this.props;
+        const pageWidth = this._getPageWidth();
+        const { sneak } = this.props;
         const { gap } = this.state;
         const computedStyles = StyleSheet.create({
             scrollView: {
@@ -232,14 +247,14 @@ export default class Carousel extends Component {
         }
 
         return (
-            <View style={[ styles.container, this.props.containerStyle ]}>
+            <View style={[ styles.container, this.props.containerStyle ]} onLayout={this._onLayout}>
                 <ScrollView
                     automaticallyAdjustContentInsets={ false }
                     bounces
                     contentContainerStyle={ [ computedStyles.scrollView ] }
                     style={{ flexDirection: (I18nManager && I18nManager.isRTL) ? 'row-reverse' : 'row' }}
                     decelerationRate={ 0.9 }
-                    horizontal
+                    horizontal = {this.props.horizontal}
                     onScrollEndDrag={ this._handleScrollEnd }
                     ref={ c => this.scrollView = c }
                     showsHorizontalScrollIndicator={ false }
